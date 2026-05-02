@@ -34,6 +34,10 @@ function toBlob(value: number | null | undefined): Buffer | null {
   return Buffer.from(Math.trunc(value).toString());
 }
 
+function toNullableString(value: unknown): string | null {
+  return typeof value === "string" ? value : null;
+}
+
 async function runBackfill() {
   const now = Date.now();
   const period2 = new Date();
@@ -72,7 +76,7 @@ async function runBackfill() {
           price: point.close ?? null,
           change,
           changePercent,
-          currency: point.currency ?? null,
+          currency: toNullableString(point.currency),
           marketTime: point.date.getTime(),
           dayHigh: point.high ?? null,
           dayLow: point.low ?? null,
