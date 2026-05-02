@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "init-db": "tsx scripts/init-db.ts"
+    "init-db": "tsx scripts/init-db.ts",
+    "backfill-last-month": "tsx scripts/backfill-last-month.ts"
   },
   "dependencies": {
     "@libsql/client": "^0.17.3",

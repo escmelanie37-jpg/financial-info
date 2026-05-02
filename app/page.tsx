@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useStockPoller } from "@/app/hooks/useStockPoller";
 import { StockCard } from "@/app/components/StockCard";
 import { StockTable } from "@/app/components/StockTable";
@@ -13,6 +13,18 @@ export default function Home() {
     useStockPoller(5000);
 
   const [selectedSymbols, setSelectedSymbols] = useState<string>("");
+  const [currentTime, setCurrentTime] = useState("--:--:--");
+
+  useEffect(() => {
+    const updateClock = () => {
+      setCurrentTime(new Date().toLocaleTimeString());
+    };
+
+    updateClock();
+    const intervalId = setInterval(updateClock, 1000);
+
+    return () => clearInterval(intervalId);
+  }, []);
 
   const stocks = Object.values(current).sort((a, b) =>
     a.symbol.localeCompare(b.symbol)
@@ -32,7 +44,7 @@ export default function Home() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-4xl font-bold text-gray-900">Stock Monitor</h1>
+            <h1 className="text-4xl font-bold text-gray-900">UADE Finance Stock Monitor</h1>
             <p className="mt-1 text-gray-600">
               Real-time stock prices updated every 5 seconds
             </p>
@@ -82,9 +94,7 @@ export default function Home() {
             </div>
             <div className="text-gray-600">
               Current Time:{" "}
-              <span className="font-semibold">
-                {new Date().toLocaleTimeString()}
-              </span>
+              <span className="font-semibold">{currentTime}</span>
             </div>
           </div>
         </div>

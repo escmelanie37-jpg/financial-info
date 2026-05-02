@@ -63,24 +63,23 @@ function formatLabel(date: Date, granularity: TimeGranularity): string {
   return date.toLocaleTimeString();
 }
 
+function formatTick(timestamp: number, granularity: TimeGranularity): string {
+  const date = new Date(timestamp);
+  if (granularity === "years") return `${date.getFullYear()}`;
+  if (granularity === "days") {
+    return date.toLocaleDateString([], { month: "short", day: "2-digit" });
+  }
+  if (granularity === "hours") {
+    return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  }
+  if (granularity === "minutes") {
+    return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  }
+  return date.toLocaleTimeString([], { minute: "2-digit", second: "2-digit" });
+}
+
 export function StockChart({ data, selectedSymbols }: StockChartProps) {
   const [granularity, setGranularity] = useState<TimeGranularity>("seconds");
-
-  if (data.length === 0) {
-    return (
-      <div className="flex h-96 items-center justify-center rounded-lg border border-gray-200 bg-gray-50">
-        <p className="text-gray-500">Waiting for stock data...</p>
-      </div>
-    );
-  }
-
-  if (selectedSymbols.length === 0) {
-    return (
-      <div className="flex h-96 items-center justify-center rounded-lg border border-gray-200 bg-gray-50">
-        <p className="text-gray-500">Select stocks to compare</p>
-      </div>
-    );
-  }
 
   const chartData = useMemo(() => {
     const sorted = [...data].sort((a, b) => a.timestamp - b.timestamp);
@@ -114,6 +113,22 @@ export function StockChart({ data, selectedSymbols }: StockChartProps) {
       }));
   }, [data, granularity]);
 
+  if (data.length === 0) {
+    return (
+      <div className="flex h-96 items-center justify-center rounded-lg border border-gray-200 bg-gray-50">
+        <p className="text-gray-500">Waiting for stock data...</p>
+      </div>
+    );
+  }
+
+  if (selectedSymbols.length === 0) {
+    return (
+      <div className="flex h-96 items-center justify-center rounded-lg border border-gray-200 bg-gray-50">
+        <p className="text-gray-500">Select stocks to compare</p>
+      </div>
+    );
+  }
+
   return (
     <div className="rounded-lg border border-gray-200 bg-white p-4">
       <div className="mb-4 flex flex-wrap gap-2">
@@ -140,10 +155,15 @@ export function StockChart({ data, selectedSymbols }: StockChartProps) {
         <LineChart data={chartData} margin={{ top: 5, right: 30, left: 0, bottom: 5 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
           <XAxis
-            dataKey="date"
+            type="number"
+            dataKey="timestamp"
+            scale="time"
+            domain={["dataMin", "dataMax"]}
+            tickFormatter={(value) => formatTick(Number(value), granularity)}
             tick={{ fontSize: 12 }}
             stroke="#6b7280"
-            interval={Math.max(0, Math.floor(chartData.length / 10))}
+            interval="preserveStartEnd"
+            minTickGap={24}
           />
           <YAxis
             tick={{ fontSize: 12 }}
@@ -162,6 +182,9 @@ export function StockChart({ data, selectedSymbols }: StockChartProps) {
               }
               return value;
             }}
+            labelFormatter={(value) =>
+              formatLabel(new Date(Number(value)), granularity)
+            }
           />
           <Legend />
           {selectedSymbols.map((symbol, idx) => (

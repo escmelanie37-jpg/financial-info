@@ -3,7 +3,10 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { PollerState, HistoricalDataPoint, StockQuote } from "@/lib/types";
 
-const MAX_HISTORICAL_POINTS = 100;
+// Keep a larger in-memory window so chart granularity toggles
+// (days/hours/minutes/seconds) have enough data to aggregate.
+const MAX_HISTORICAL_POINTS = 10000;
+const INITIAL_HISTORY_LIMIT = 10000;
 
 export function useStockPoller(interval: number = 5000) {
   const [state, setState] = useState<PollerState>({
@@ -76,7 +79,7 @@ export function useStockPoller(interval: number = 5000) {
 
   const loadHistoricalData = useCallback(async () => {
     try {
-      const response = await fetch("/api/stocks/history?limit=100");
+      const response = await fetch(`/api/stocks/history?limit=${INITIAL_HISTORY_LIMIT}`);
       if (!response.ok) return;
 
       const json = await response.json();
