@@ -17,3 +17,5 @@ export const db = drizzle(client, {
     ...relations
   } 
 });
+
+// force rebuild
